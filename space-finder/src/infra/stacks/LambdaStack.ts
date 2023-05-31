@@ -5,6 +5,7 @@ import {join} from 'path';
 import {LambdaIntegration} from "aws-cdk-lib/aws-apigateway";
 import {ITable} from "aws-cdk-lib/aws-dynamodb";
 import {NodejsFunction} from "aws-cdk-lib/aws-lambda-nodejs";
+import {Effect, PolicyStatement} from "aws-cdk-lib/aws-iam";
 
 interface LambdaStackProps extends StackProps {
   spacesTable: ITable
@@ -24,7 +25,16 @@ export class LambdaStack extends Stack {
       environment: {
         TABLE_NAME: props.spacesTable.tableName
       }
-    })
+    });
+
+    helloLambda.addToRolePolicy(new PolicyStatement({
+      effect: Effect.ALLOW,
+      actions: [
+        's3:ListAllMyBuckets',
+        's3:ListBucket'
+      ],
+      resources:  ["*"]
+    }))
 
     this.helloLambdaIntegration = new LambdaIntegration(helloLambda);
   }
